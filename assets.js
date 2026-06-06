@@ -1,48 +1,53 @@
+// Determine the correct base path for assets
+const basePath = window.location.pathname.includes("genshindle-helper")
+  ? "/genshindle-helper/"
+  : "./";
+
 const genshinAssets = {
   elements: {
     pyro: {
       color: "#EC4923",
-      icon: "./assets/elements/pyro.png",
+      icon: basePath + "assets/elements/pyro.png",
     },
     hydro: {
       color: "#00BFFF",
-      icon: "./assets/elements/hydro.png",
+      icon: basePath + "assets/elements/hydro.png",
     },
     anemo: {
       color: "#359697",
-      icon: "./assets/elements/anemo.png",
+      icon: basePath + "assets/elements/anemo.png",
     },
     electro: {
       color: "#945DC4",
-      icon: "./assets/elements/electro.png",
+      icon: basePath + "assets/elements/electro.png",
     },
     dendro: {
       color: "#608A00",
-      icon: "./assets/elements/dendro.png",
+      icon: basePath + "assets/elements/dendro.png",
     },
     cryo: {
       color: "#46A8BA",
-      icon: "./assets/elements/cryo.png",
+      icon: basePath + "assets/elements/cryo.png",
     },
     geo: {
       color: "#DEBD6C",
-      icon: "./assets/elements/geo.png",
+      icon: basePath + "assets/elements/geo.png",
     },
   },
   weapons: {
-    sword: "./assets/weapons/sword.png",
-    claymore: "./assets/weapons/claymore.png",
-    polearm: "./assets/weapons/polearm.png",
-    bow: "./assets/weapons/bow.png",
-    catalyst: "./assets/weapons/catalyst.png",
+    sword: basePath + "assets/weapons/sword.png",
+    claymore: basePath + "assets/weapons/claymore.png",
+    polearm: basePath + "assets/weapons/polearm.png",
+    bow: basePath + "assets/weapons/bow.png",
+    catalyst: basePath + "assets/weapons/catalyst.png",
   },
   regions: {
-    mondstadt: "./assets/regions/mondstadt.png",
-    liyue: "./assets/regions/liyue.png",
-    inazuma: "./assets/regions/inazuma.png",
-    sumeru: "./assets/regions/sumeru.png",
-    fontaine: "./assets/regions/fontaine.png",
-    natlan: "./assets/regions/natlan.png",
-    snezhnaya: "./assets/regions/snezhnaya.png",
+    mondstadt: basePath + "assets/regions/mondstadt.png",
+    liyue: basePath + "assets/regions/liyue.png",
+    inazuma: basePath + "assets/regions/inazuma.png",
+    sumeru: basePath + "assets/regions/sumeru.png",
+    fontaine: basePath + "assets/regions/fontaine.png",
+    natlan: basePath + "assets/regions/natlan.png",
+    snezhnaya: basePath + "assets/regions/snezhnaya.png",
   },
 };
