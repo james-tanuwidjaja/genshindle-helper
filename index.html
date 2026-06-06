@@ -1,73 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Genshindle Logic Solver - Sakura Theme</title>
-    <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-
-<div class="container">
-    <div class="card">
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
         <h2>🌸 1. Load Character Data</h2>
-        <input type="file" id="csvFile" accept=".csv">
+        <input type="file" id="csvFile" accept=".csv" />
         <div class="csv-instructions">
-            Required headers: <strong>Character, Quality, Element, Weapon, Region, Version</strong>
+          Required headers:
+          <strong>Character, Quality, Element, Weapon, Region, Version</strong>
         </div>
-        <div id="loadStatus" class="status-msg" style="margin-top: 10px;">Please upload your custom dataset CSV to begin.</div>
-    </div>
+        <div id="loadStatus" class="status-msg" style="margin-top: 10px">
+          Please upload your custom dataset CSV to begin.
+        </div>
+      </div>
 
-    <div class="card" id="filterCard" style="display:none;">
+      <div class="card" id="filterCard" style="display: none">
         <h2>✨ 2. Select Remaining Possibilities</h2>
-        <p class="csv-instructions" style="margin-top: -10px; margin-bottom: 20px;">
-            Uncheck the attributes that have been eliminated by the game. Keep the possible ones checked.
+        <p
+          class="csv-instructions"
+          style="margin-top: -10px; margin-bottom: 20px"
+        >
+          Uncheck the attributes that have been eliminated by the game. Keep the
+          possible ones checked.
         </p>
 
         <div id="dynamicFilters"></div>
 
         <div class="filter-group">
-            <div class="filter-title">Version Range</div>
-            <div class="version-inputs">
-                <label>Bottom / Min Limit: <input type="number" step="0.1" id="minVersion"></label>
-                <label>Top / Max Limit: <input type="number" step="0.1" id="maxVersion"></label>
-            </div>
+          <div class="filter-title">Version Range</div>
+          <div class="version-inputs">
+            <label
+              >Bottom / Min Limit:
+              <input type="number" step="0.1" id="minVersion"
+            /></label>
+            <label
+              >Top / Max Limit: <input type="number" step="0.1" id="maxVersion"
+            /></label>
+          </div>
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="resetFilters()">↺ Reset All Filters</button>
-            <button class="btn" onclick="processLogic()">✦ Update Pool & Find Best Guess ✦</button>
+          <button class="btn btn-secondary" onclick="resetFilters()">
+            ↺ Reset All Filters
+          </button>
+          <button class="btn" onclick="processLogic()">
+            ✦ Update Pool & Find Best Guess ✦
+          </button>
         </div>
+      </div>
+
+      <div class="results-layout" id="resultsSection" style="display: none">
+        <div class="card">
+          <h3>Candidate Pool (<span id="poolCount">0</span> remaining)</h3>
+          <div
+            style="
+              max-height: 500px;
+              overflow-y: auto;
+              border-radius: 8px;
+              border: 1px solid var(--border-color);
+            "
+          >
+            <table id="poolTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>★</th>
+                  <th>Element</th>
+                  <th>Weapon</th>
+                  <th>Region</th>
+                  <th>Ver</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Best Next Guess Strategy</h3>
+          <div id="recommendationArea"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="results-layout" id="resultsSection" style="display:none;">
-        <div class="card">
-            <h3>Candidate Pool (<span id="poolCount">0</span> remaining)</h3>
-            <div style="max-height: 500px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--border-color);">
-                <table id="poolTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>★</th>
-                            <th>Element</th>
-                            <th>Weapon</th>
-                            <th>Region</th>
-                            <th>Ver</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Best Next Guess Strategy</h3>
-            <div id="recommendationArea"></div>
-        </div>
-    </div>
-</div>
-
-<script src="./script.js"></script>
-
-</body>
+    <script src="./assets.js"></script>
+    <script src="./script.js"></script>
+  </body>
 </html>
