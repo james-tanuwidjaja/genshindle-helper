@@ -1,7 +1,19 @@
 // Determine the correct base path for assets
-const basePath = window.location.pathname.includes("genshindle-helper")
-  ? "/genshindle-helper/"
-  : "./";
+const basePath = (() => {
+  const pathname = window.location.pathname;
+  // Check if we're on GitHub Pages by looking for /genshindle-helper/ in the path
+  if (pathname.includes("/genshindle-helper/")) {
+    return "/genshindle-helper/";
+  } else if (pathname.includes("/genshindle-helper")) {
+    return "/genshindle-helper/";
+  }
+  // Local development
+  return "./";
+})();
+
+console.log("Detected pathname:", window.location.pathname);
+console.log("Using basePath:", basePath);
+console.log("Example asset path:", basePath + "assets/elements/pyro.png");
 
 const genshinAssets = {
   elements: {
