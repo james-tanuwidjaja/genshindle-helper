@@ -189,12 +189,295 @@ input[type="number"]:focus {
   gap: 20px;
 }
 
-@media (max-width: 800px) {
+/* Responsive Design */
+
+/* Tablets and below (max 1024px) */
+@media (max-width: 1024px) {
+  body {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  h2,
+  h3 {
+    font-size: 1.3rem;
+  }
+
   .results-layout {
     grid-template-columns: 1fr;
   }
+
   .btn-group {
     flex-direction: column;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Medium devices (tablets, max 768px) */
+@media (max-width: 768px) {
+  body {
+    padding: 12px;
+  }
+
+  .container {
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .csv-instructions {
+    font-size: 0.85rem;
+  }
+
+  .filter-group {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .filter-title {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .checkbox-grid {
+    gap: 8px;
+  }
+
+  .checkbox-label {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .checkbox-label input {
+    width: 14px;
+    height: 14px;
+  }
+
+  .asset-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .version-inputs {
+    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .version-inputs label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  input[type="number"],
+  input[type="file"] {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border-radius: 20px;
+  }
+
+  .btn-group {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  th:first-child,
+  td:first-child {
+    min-width: 80px;
+    max-width: 120px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    min-width: 40px;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(4),
+  th:nth-child(5),
+  td:nth-child(5) {
+    min-width: 70px;
+  }
+
+  .td-flex {
+    gap: 6px;
+  }
+
+  .recommendation-box {
+    padding: 16px;
+    margin-top: 12px;
+  }
+
+  .highlight-name {
+    font-size: 1.3rem;
+    gap: 8px;
+  }
+}
+
+/* Small phones (max 480px) */
+@media (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+
+  .container {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .csv-instructions {
+    font-size: 0.8rem;
+  }
+
+  .filter-group {
+    padding: 10px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent-gold);
+  }
+
+  .filter-title {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+
+  .checkbox-grid {
+    gap: 6px;
+  }
+
+  .checkbox-label {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+
+  .checkbox-label input {
+    width: 13px;
+    height: 13px;
+  }
+
+  .asset-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .version-inputs {
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .version-inputs label {
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  input[type="number"],
+  input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .btn-group {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  table {
+    margin-top: 8px;
+    font-size: 0.75rem;
+  }
+
+  th,
+  td {
+    padding: 6px;
+    font-size: 0.75rem;
+  }
+
+  th:first-child,
+  td:first-child {
+    min-width: 70px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    min-width: 30px;
+    text-align: center;
+  }
+
+  th:nth-child(n + 3),
+  td:nth-child(n + 3) {
+    min-width: 50px;
+  }
+
+  .td-flex {
+    gap: 4px;
+    flex-direction: column;
+  }
+
+  .recommendation-box {
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+  }
+
+  .highlight-name {
+    font-size: 1.1rem;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  #poolTable tbody tr:nth-child(n + 6) {
+    display: none;
   }
 }
 
