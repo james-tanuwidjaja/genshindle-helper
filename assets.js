@@ -2,58 +2,47 @@ const genshinAssets = {
   elements: {
     pyro: {
       color: "#EC4923",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Pyro.png",
+      icon: "./assets/elements/pyro.png",
     },
     hydro: {
       color: "#00BFFF",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Hydro.png",
+      icon: "./assets/elements/hydro.png",
     },
     anemo: {
       color: "#359697",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Anemo.png",
+      icon: "./assets/elements/anemo.png",
     },
     electro: {
       color: "#945DC4",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Electro.png",
+      icon: "./assets/elements/electro.png",
     },
     dendro: {
       color: "#608A00",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Dendro.png",
+      icon: "./assets/elements/dendro.png",
     },
     cryo: {
       color: "#46A8BA",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Cryo.png",
+      icon: "./assets/elements/cryo.png",
     },
     geo: {
       color: "#DEBD6C",
-      icon: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Element_Geo.png",
+      icon: "./assets/elements/geo.png",
     },
   },
   weapons: {
-    sword:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Icon_Sword.png",
-    claymore:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Icon_Claymore.png",
-    polearm:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Icon_Polearm.png",
-    bow: "https://genshin-impact.fandom.com/wiki/Special:FilePath/Icon_Bow.png",
-    catalyst:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Icon_Catalyst.png",
+    sword: "./assets/weapons/sword.png",
+    claymore: "./assets/weapons/claymore.png",
+    polearm: "./assets/weapons/polearm.png",
+    bow: "./assets/weapons/bow.png",
+    catalyst: "./assets/weapons/catalyst.png",
   },
   regions: {
-    mondstadt:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Mondstadt.png",
-    liyue:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Liyue.png",
-    inazuma:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Inazuma.png",
-    sumeru:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Sumeru.png",
-    fontaine:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Fontaine.png",
-    natlan:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Natlan.png",
-    snezhnaya:
-      "https://genshin-impact.fandom.com/wiki/Special:FilePath/Emblem_Snezhnaya.png",
+    mondstadt: "./assets/regions/mondstadt.png",
+    liyue: "./assets/regions/liyue.png",
+    inazuma: "./assets/regions/inazuma.png",
+    sumeru: "./assets/regions/sumeru.png",
+    fontaine: "./assets/regions/fontaine.png",
+    natlan: "./assets/regions/natlan.png",
+    snezhnaya: "./assets/regions/snezhnaya.png",
   },
 };
