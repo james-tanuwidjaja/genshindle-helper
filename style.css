@@ -51,7 +51,7 @@ h3 {
   background-color: var(--bg-panel);
   border: 2px solid var(--border-color);
   border-radius: 16px;
-  padding: 24px;
+  padding: 18px;
   box-shadow: var(--shadow-soft);
 }
 
@@ -63,8 +63,8 @@ h3 {
 
 /* Filter Section Styles */
 .filter-group {
-  margin-bottom: 20px;
-  padding: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 12px;
   border-left: 5px solid var(--accent-gold);
@@ -73,23 +73,23 @@ h3 {
 
 .filter-title {
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: var(--accent-pink);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .checkbox-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: #ffffff;
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-radius: 20px;
   border: 2px solid var(--border-color);
   cursor: pointer;
@@ -105,16 +105,16 @@ h3 {
 }
 
 .checkbox-label input {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
   accent-color: var(--accent-pink);
 }
 
 /* Asset Icons */
 .asset-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.1));
 }
@@ -122,7 +122,7 @@ h3 {
 .version-inputs {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -131,11 +131,11 @@ input[type="file"] {
   background-color: #ffffff;
   color: var(--text-main);
   border: 2px solid var(--border-color);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   outline: none;
-  font-size: 1rem;
-  width: 100px;
+  font-size: 0.95rem;
+  width: 80px;
   transition: 0.2s;
 }
 
@@ -147,19 +147,19 @@ input[type="number"]:focus {
 /* Buttons */
 .btn-group {
   display: flex;
-  gap: 15px;
-  margin-top: 15px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .btn {
   background-color: var(--accent-pink);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 8px 16px;
   border-radius: 25px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   transition: all 0.2s;
   flex: 1;
   box-shadow: 0 4px 10px rgba(255, 107, 158, 0.3);
