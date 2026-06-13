@@ -128,8 +128,7 @@ h3 {
   flex-wrap: wrap;
 }
 
-input[type='number'],
-input[type='file'] {
+input[type='number'] {
   background-color: #ffffff;
   color: var(--text-main);
   border: 2px solid var(--border-color);
@@ -290,8 +289,7 @@ input[type='number']:focus {
     width: 100%;
   }
 
-  input[type='number'],
-  input[type='file'] {
+  input[type='number'] {
     width: 100%;
     font-size: 1rem;
     padding: 10px;
@@ -417,8 +415,7 @@ input[type='number']:focus {
     width: 100%;
   }
 
-  input[type='number'],
-  input[type='file'] {
+  input[type='number'] {
     width: 100%;
     padding: 8px;
     font-size: 0.9rem;
