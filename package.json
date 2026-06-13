@@ -1,0 +1,43 @@
+{
+  "name": "genshindle-helper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A helper tool for Genshin Impact guessing games (Vue 3 + Vite + TypeScript).",
+  "homepage": "https://james-tanuwidjaja.github.io/genshindle-helper/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/james-tanuwidjaja/genshindle-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/james-tanuwidjaja/genshindle-helper/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.8.0",
+    "eslint": "^10.5.0",
+    "eslint-plugin-vue": "^10.9.2",
+    "prettier": "^3.8.4",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16",
+    "vue-tsc": "^3.3.5"
+  }
+}

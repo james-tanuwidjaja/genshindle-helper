@@ -16,18 +16,20 @@
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-page);
   color: var(--text-main);
   margin: 0;
   padding: 20px;
   display: flex;
   justify-content: center;
-  background-image: radial-gradient(
-    circle at center,
-    #ffffff 0%,
-    transparent 80%
-  );
+  background-image: radial-gradient(circle at center, #ffffff 0%, transparent 80%);
+}
+
+#app {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .container {
@@ -126,8 +128,8 @@ h3 {
   flex-wrap: wrap;
 }
 
-input[type="number"],
-input[type="file"] {
+input[type='number'],
+input[type='file'] {
   background-color: #ffffff;
   color: var(--text-main);
   border: 2px solid var(--border-color);
@@ -139,7 +141,7 @@ input[type="file"] {
   transition: 0.2s;
 }
 
-input[type="number"]:focus {
+input[type='number']:focus {
   border-color: var(--accent-gold);
   box-shadow: 0 0 0 3px rgba(255, 177, 43, 0.2);
 }
@@ -288,8 +290,8 @@ input[type="number"]:focus {
     width: 100%;
   }
 
-  input[type="number"],
-  input[type="file"] {
+  input[type='number'],
+  input[type='file'] {
     width: 100%;
     font-size: 1rem;
     padding: 10px;
@@ -415,8 +417,8 @@ input[type="number"]:focus {
     width: 100%;
   }
 
-  input[type="number"],
-  input[type="file"] {
+  input[type='number'],
+  input[type='file'] {
     width: 100%;
     padding: 8px;
     font-size: 0.9rem;

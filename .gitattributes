@@ -1,3 +1,8 @@
+# Normalize line endings: store text as LF in the repo, check out LF on every OS.
+# This stops the "LF will be replaced by CRLF" warnings on Windows.
+* text=auto eol=lf
+
+# Treat image assets as binary (no line-ending or diff munging).
 *.png binary
 *.jpg binary
 *.jpeg binary
