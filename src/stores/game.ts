@@ -36,8 +36,10 @@ export const useGameStore = defineStore('game', () => {
     regions: [],
   })
   const versionBounds = reactive({ min: 0, max: 0 })
+  const versions = ref<number[]>([])
   const minVersion = ref(0)
   const maxVersion = ref(0)
+  const exactMode = ref(false)
 
   // Results are only shown once the user has run the solver at least once.
   const hasResults = ref(false)
@@ -59,8 +61,10 @@ export const useGameStore = defineStore('game', () => {
       selected.regions = [...parsed.regions]
       versionBounds.min = parsed.minVer
       versionBounds.max = parsed.maxVer
+      versions.value = parsed.versions
       minVersion.value = parsed.minVer
       maxVersion.value = parsed.maxVer
+      exactMode.value = false
       hasResults.value = false
       pool.value = []
       recommendation.value = null
@@ -107,6 +111,7 @@ export const useGameStore = defineStore('game', () => {
     selected.regions = [...options.regions]
     minVersion.value = versionBounds.min
     maxVersion.value = versionBounds.max
+    exactMode.value = false
     process()
   }
 
@@ -117,8 +122,10 @@ export const useGameStore = defineStore('game', () => {
     options,
     selected,
     versionBounds,
+    versions,
     minVersion,
     maxVersion,
+    exactMode,
     hasResults,
     pool,
     recommendation,

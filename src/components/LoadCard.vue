@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useGameStore } from '@/stores/game'
+import defaultCsv from '@/data/characters.csv?raw'
 import '@/assets/load-card.css'
 
 const store = useGameStore()
 const isDragging = ref(false)
 const fileName = ref('')
+
+// Offer the bundled dataset as a downloadable template/example.
+function downloadExample() {
+  const blob = new Blob([defaultCsv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'characters.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 function onFileChange(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -45,6 +57,12 @@ function onDrop(event: DragEvent) {
     <div class="csv-instructions">
       Required headers:
       <strong>Character, Quality, Element, Weapon, Region, Version</strong>
+      <div class="csv-example">
+        Not sure about the format?
+        <button type="button" class="download-link" @click="downloadExample">
+          ⬇ Download example CSV
+        </button>
+      </div>
     </div>
     <div class="status-msg" style="margin-top: 10px">
       {{ store.loadStatus }}

@@ -16,6 +16,81 @@ const filterGroups = computed<
   { title: 'Weapon', type: 'Weapon', items: store.options.weapons, model: 'weapons' },
   { title: 'Region', type: 'Region', items: store.options.regions, model: 'regions' },
 ])
+
+// The slider works on indices into the sorted, de-duplicated version list. It
+// snaps to the closest existing version so the thumb stays sensible even when a
+// value has been typed into the number inputs that isn't an exact CSV version.
+function indexOfVersion(v: number): number {
+  const versions = store.versions
+  if (!versions.length) return 0
+  let best = 0
+  let bestDiff = Infinity
+  for (let i = 0; i < versions.length; i++) {
+    const diff = Math.abs(versions[i] - v)
+    if (diff < bestDiff) {
+      bestDiff = diff
+      best = i
+    }
+  }
+  return best
+}
+
+const minIndex = computed<number>({
+  get: () => indexOfVersion(store.minVersion),
+  set: (i) => {
+    const clamped = Math.min(Number(i), maxIndex.value)
+    store.minVersion = store.versions[clamped]
+  },
+})
+
+const maxIndex = computed<number>({
+  get: () => indexOfVersion(store.maxVersion),
+  set: (i) => {
+    const clamped = Math.max(Number(i), minIndex.value)
+    store.maxVersion = store.versions[clamped]
+  },
+})
+
+// In exact mode a single thumb sets both bounds to the same version.
+const exactIndex = computed<number>({
+  get: () => indexOfVersion(store.minVersion),
+  set: (i) => {
+    const v = store.versions[Number(i)]
+    store.minVersion = v
+    store.maxVersion = v
+  },
+})
+
+// Exact-mode number input: typing a value writes it to both bounds directly,
+// so any version (even one not present in the CSV) can be entered.
+const exactVersion = computed<number>({
+  get: () => store.minVersion,
+  set: (v) => {
+    store.minVersion = v
+    store.maxVersion = v
+  },
+})
+
+function toggleExact() {
+  store.exactMode = !store.exactMode
+  if (store.exactMode) {
+    // Collapse the range to a single value (keep the current lower bound).
+    store.maxVersion = store.minVersion
+  } else {
+    // Re-open the range up to the dataset's highest version.
+    store.maxVersion = store.versionBounds.max
+  }
+}
+
+// Percentages for the highlighted segment of the track between the two thumbs.
+const rangeFill = computed(() => {
+  const n = store.versions.length - 1
+  if (n <= 0) return { left: '0%', right: '0%' }
+  return {
+    left: `${(minIndex.value / n) * 100}%`,
+    right: `${100 - (maxIndex.value / n) * 100}%`,
+  }
+})
 </script>
 
 <template>
@@ -35,18 +110,70 @@ const filterGroups = computed<
       </div>
     </div>
 
-    <div class="filter-group">
-      <div class="filter-title">Version Range</div>
-      <div class="version-inputs">
-        <label>
-          Bottom / Min Limit:
-          <input type="number" step="0.1" v-model="store.minVersion" />
-        </label>
-        <label>
-          Top / Max Limit:
-          <input type="number" step="0.1" v-model="store.maxVersion" />
+    <div v-if="store.versions.length" class="filter-group">
+      <div class="filter-title version-header">
+        <span>Version Range</span>
+        <label class="exact-toggle">
+          <input type="checkbox" :checked="store.exactMode" @change="toggleExact" />
+          Exact version
         </label>
       </div>
+
+      <template v-if="!store.exactMode">
+        <div class="range-slider">
+          <div class="range-track"></div>
+          <div class="range-track-fill" :style="{ left: rangeFill.left, right: rangeFill.right }"></div>
+          <input
+            type="range"
+            class="range-input"
+            :min="0"
+            :max="store.versions.length - 1"
+            step="1"
+            v-model.number="minIndex"
+            aria-label="Minimum version"
+          />
+          <input
+            type="range"
+            class="range-input"
+            :min="0"
+            :max="store.versions.length - 1"
+            step="1"
+            v-model.number="maxIndex"
+            aria-label="Maximum version"
+          />
+        </div>
+        <div class="version-inputs">
+          <label>
+            Min:
+            <input type="number" step="0.1" v-model.number="store.minVersion" />
+          </label>
+          <label>
+            Max:
+            <input type="number" step="0.1" v-model.number="store.maxVersion" />
+          </label>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="range-slider">
+          <div class="range-track"></div>
+          <input
+            type="range"
+            class="range-input"
+            :min="0"
+            :max="store.versions.length - 1"
+            step="1"
+            v-model.number="exactIndex"
+            aria-label="Exact version"
+          />
+        </div>
+        <div class="version-inputs version-inputs-center">
+          <label>
+            Version:
+            <input type="number" step="0.1" v-model.number="exactVersion" />
+          </label>
+        </div>
+      </template>
     </div>
 
     <div class="btn-group">
@@ -55,3 +182,124 @@ const filterGroups = computed<
     </div>
   </div>
 </template>
+
+<style scoped>
+.version-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exact-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.exact-toggle input {
+  cursor: pointer;
+  accent-color: var(--accent-pink);
+}
+
+/* Dual-thumb slider: two overlapping range inputs sharing one track. */
+.range-slider {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  margin: 8px 4px 0;
+}
+
+.range-track,
+.range-track-fill {
+  position: absolute;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.range-track {
+  left: 0;
+  right: 0;
+  background: var(--border-color);
+}
+
+.range-track-fill {
+  background: var(--accent-pink);
+}
+
+.range-input {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  height: 24px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--accent-pink);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.range-input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--accent-pink);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.version-inputs {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.version-inputs-center {
+  justify-content: center;
+}
+
+.version-inputs label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.version-inputs input[type='number'] {
+  width: 70px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.version-inputs input[type='number']:focus {
+  outline: none;
+  border-color: var(--accent-pink);
+}
+</style>
