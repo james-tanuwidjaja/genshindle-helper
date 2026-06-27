@@ -1,21 +1,59 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useGameStore } from '@/stores/game'
 import { elementIcon } from '@/lib/genshinAssets'
 import AttrTag from '@/components/AttrTag.vue'
+import { computeBreakdown } from '@/lib/logic'
 import type { Character } from '@/lib/logic'
 
 const store = useGameStore()
 
-// Narrow the discriminated union into typed computed values so the template
-// stays simple and type-safe.
 const isNone = computed(() => store.recommendation?.type === 'none')
 const solved = computed(() =>
   store.recommendation?.type === 'solved' ? store.recommendation : null,
 )
 const guess = computed(() => (store.recommendation?.type === 'guess' ? store.recommendation : null))
+
+// Which alternative (if any) the user has selected to preview
+const displayedChar = ref<Character | null>(null)
+
+// Reset preview whenever the solver produces a new recommendation
+watch(guess, () => {
+  displayedChar.value = null
+})
+
+// The character currently displayed (primary or a selected alternative)
+const activeChar = computed(() => displayedChar.value ?? guess.value?.selection ?? null)
+
+// inPool status for whatever is currently being displayed
+const activeInPool = computed(() => {
+  if (!guess.value) return false
+  if (!displayedChar.value) return guess.value.inPool
+  return (
+    guess.value.alternatives.find(
+      (a) => a.selection.Character === displayedChar.value!.Character,
+    )?.inPool ?? false
+  )
+})
+
+// Primary + all tied alternatives combined into one list for the chip row
+const allOptimalChars = computed(() => {
+  if (!guess.value) return []
+  return [
+    { selection: guess.value.selection, inPool: guess.value.inPool },
+    ...guess.value.alternatives,
+  ]
+})
+
+// Breakdown recomputed for whichever character is active
+const activeBreakdown = computed(() => {
+  if (!guess.value) return []
+  if (!displayedChar.value) return guess.value.breakdown
+  return computeBreakdown(displayedChar.value, store.pool, guess.value.worstCase)
+})
+
 const recElementIcon = computed(() =>
-  guess.value ? elementIcon(guess.value.selection.Element) : null,
+  activeChar.value ? elementIcon(activeChar.value.Element) : null,
 )
 
 // --- Guess feedback state (local UI only) ---
@@ -28,8 +66,10 @@ const feedbackVersion = ref<'exact' | 'higher' | 'lower' | null>(null)
 
 const inFeedbackMode = computed(() => activeGuess.value !== null)
 
-function startGuess(char: Character) {
-  activeGuess.value = char
+function startGuess(char?: Character) {
+  const target = char ?? activeChar.value
+  if (!target) return
+  activeGuess.value = target
   feedbackQuality.value =
     feedbackElement.value =
     feedbackWeapon.value =
@@ -95,6 +135,22 @@ function applyGuessResult() {
 
   store.process()
   cancelGuess()
+}
+
+// Parses a raw signature key into colored chip descriptors for the breakdown rows
+type ChipInfo = { label: string; state: 'match' | 'wrong' | 'hint' }
+function parseKeyToChips(key: string): ChipInfo[] {
+  const [q, e, w, r, v] = key.split('-')
+  return [
+    { label: q === 'true' ? 'Quality ✓' : 'Quality ✗', state: q === 'true' ? 'match' : 'wrong' },
+    { label: e === 'true' ? 'Element ✓' : 'Element ✗', state: e === 'true' ? 'match' : 'wrong' },
+    { label: w === 'true' ? 'Weapon ✓' : 'Weapon ✗', state: w === 'true' ? 'match' : 'wrong' },
+    { label: r === 'true' ? 'Region ✓' : 'Region ✗', state: r === 'true' ? 'match' : 'wrong' },
+    {
+      label: v === 'equal' ? 'Ver =' : v === 'up' ? 'Ver ↑' : 'Ver ↓',
+      state: v === 'equal' ? 'match' : 'hint',
+    },
+  ]
 }
 </script>
 
@@ -267,18 +323,18 @@ function applyGuessResult() {
             Suggested Next Guess:
           </p>
           <div class="highlight-name">
-            {{ guess?.selection.Character }}
+            {{ activeChar?.Character }}
             <img v-if="recElementIcon" :src="recElementIcon" class="asset-icon" alt="" />
           </div>
           <p style="margin-top: 15px; font-size: 0.95rem; line-height: 1.5">
             <strong>Strategy Analysis:</strong> Guessing
-            <b>{{ guess?.selection.Character }}</b> safely breaks the remaining
+            <b>{{ activeChar?.Character }}</b> safely breaks the remaining
             {{ guess?.poolSize }} candidates into distinct profiles based on the game's feedback. In
             the absolute worst-case scenario, the candidate pool will instantly shrink down to a
             maximum of <strong>{{ guess?.worstCase }}</strong> item(s).
           </p>
           <p class="strategy-note">
-            <template v-if="guess?.inPool">
+            <template v-if="activeInPool">
               🎯 <b>In Pool:</b> This character is among the remaining candidates. You win instantly
               if they are the target.
             </template>
@@ -288,20 +344,48 @@ function applyGuessResult() {
             </template>
           </p>
 
+          <!-- Primary action: Use as Guess + all optimal chips — above the breakdown -->
+          <button class="btn-use-guess" @click="startGuess()">▶ Use as Guess</button>
+
+          <div v-if="allOptimalChars.length > 1" class="alternatives-section">
+            <span class="alt-title">All optimal:</span>
+            <button
+              v-for="opt in allOptimalChars.slice(0, 8)"
+              :key="opt.selection.Character"
+              :class="[
+                'alt-chip',
+                { 'alt-in-pool': opt.inPool, 'alt-active': opt.selection.Character === activeChar?.Character },
+              ]"
+              @click="
+                displayedChar =
+                  opt.selection.Character === activeChar?.Character ? displayedChar : opt.selection
+              "
+            >
+              {{ opt.selection.Character }}
+            </button>
+            <span v-if="allOptimalChars.length > 8" class="alt-overflow">
+              +{{ allOptimalChars.length - 8 }} more
+            </span>
+          </div>
+
           <!-- Outcome breakdown -->
           <div class="breakdown-section">
             <div class="breakdown-title">Possible Outcomes</div>
-            <div class="breakdown-hint">
-              Q=Quality · E=Element · W=Weapon · R=Region · V=Version (↑ newer · ↓ older · = same)
-            </div>
             <details
-              v-for="grp in guess.breakdown"
-              :key="grp.label"
+              v-for="grp in activeBreakdown"
+              :key="grp.key"
               class="breakdown-row"
               :class="{ 'row-worst': grp.isWorstCase, 'row-win': grp.isWin }"
             >
               <summary class="breakdown-summary">
-                <span class="sig-label">{{ grp.label }}</span>
+                <div class="sig-chips">
+                  <span
+                    v-for="chip in parseKeyToChips(grp.key)"
+                    :key="chip.label"
+                    :class="['sig-chip', `chip-${chip.state}`]"
+                    >{{ chip.label }}</span
+                  >
+                </div>
                 <span class="sig-count"
                   >{{ grp.count }} candidate{{ grp.count !== 1 ? 's' : '' }}</span
                 >
@@ -313,26 +397,6 @@ function applyGuessResult() {
               </div>
             </details>
           </div>
-
-          <!-- Alternative equally-optimal guesses -->
-          <div v-if="guess.alternatives.length" class="alternatives-section">
-            <span class="alt-title">Also optimal:</span>
-            <span
-              v-for="alt in guess.alternatives.slice(0, 8)"
-              :key="alt.selection.Character"
-              class="alt-chip"
-              :class="{ 'alt-in-pool': alt.inPool }"
-            >
-              {{ alt.selection.Character }}
-            </span>
-            <span v-if="guess.alternatives.length > 8" class="alt-overflow">
-              +{{ guess.alternatives.length - 8 }} more
-            </span>
-          </div>
-
-          <button class="btn-use-guess" @click="startGuess(guess!.selection)">
-            ▶ Use as Guess
-          </button>
         </div>
       </template>
     </div>
@@ -377,7 +441,7 @@ function applyGuessResult() {
   border-color: var(--accent-pink);
 }
 
-/* "Use as Guess" gold button in recommendation box */
+/* "Use as Guess" gold button */
 .btn-use-guess {
   margin-top: 14px;
   width: 100%;
@@ -397,6 +461,53 @@ function applyGuessResult() {
   transform: translateY(-1px);
 }
 
+/* All optimal chips */
+.alternatives-section {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.alt-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+.alt-chip {
+  background: var(--bg-page);
+  border: 1.5px solid var(--border-color);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.alt-chip:hover:not(.alt-active) {
+  border-color: var(--accent-pink);
+  color: var(--accent-pink);
+}
+.alt-in-pool {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+.alt-active {
+  background: var(--accent-pink);
+  color: #fff;
+  border-color: var(--accent-pink);
+  font-weight: 600;
+}
+.alt-in-pool.alt-active {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+.alt-overflow {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
 /* Outcome breakdown */
 .breakdown-section {
   margin-top: 16px;
@@ -405,11 +516,6 @@ function applyGuessResult() {
   font-weight: bold;
   color: var(--accent-pink);
   font-size: 0.9rem;
-  margin-bottom: 4px;
-}
-.breakdown-hint {
-  font-size: 0.72rem;
-  color: var(--text-muted);
   margin-bottom: 8px;
 }
 .breakdown-row {
@@ -426,6 +532,7 @@ function applyGuessResult() {
   padding: 7px 10px;
   list-style: none;
   user-select: none;
+  flex-wrap: wrap;
 }
 .breakdown-summary::-webkit-details-marker {
   display: none;
@@ -446,13 +553,33 @@ function applyGuessResult() {
 .row-win > .breakdown-summary {
   background: #f0fff4;
 }
-.sig-label {
-  font-family: monospace;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-main);
-  min-width: 120px;
+
+/* Colored attribute chips in breakdown rows */
+.sig-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
 }
+.sig-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.chip-match {
+  background: #e6f9ed;
+  color: #2e7d32;
+}
+.chip-wrong {
+  background: #fde8e8;
+  color: #c62828;
+}
+.chip-hint {
+  background: #fff8e1;
+  color: #795300;
+}
+
 .sig-count {
   margin-left: auto;
   font-size: 0.82rem;
@@ -481,37 +608,6 @@ function applyGuessResult() {
   color: var(--text-muted);
   border-top: 1px solid var(--border-color);
   line-height: 1.6;
-}
-
-/* Alternative equally-optimal guesses */
-.alternatives-section {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-.alt-title {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: bold;
-}
-.alt-chip {
-  background: var(--bg-page);
-  border: 1.5px solid var(--border-color);
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  color: var(--text-main);
-}
-.alt-in-pool {
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
-  font-weight: 600;
-}
-.alt-overflow {
-  font-size: 0.78rem;
-  color: var(--text-muted);
 }
 
 /* Feedback form */

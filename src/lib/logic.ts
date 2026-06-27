@@ -31,6 +31,7 @@ export interface Filters {
 }
 
 export type SignatureGroup = {
+  key: string
   label: string
   count: number
   characters: Character[]
@@ -166,6 +167,38 @@ function labelFromKey(key: string): string {
   ].join(' ')
 }
 
+// Build the detailed per-group breakdown for a given guess character against the pool.
+// `worstCase` is the minimax score (used to flag which groups are worst-case).
+export function computeBreakdown(
+  char: Character,
+  pool: Character[],
+  worstCase: number,
+): SignatureGroup[] {
+  const detailedGroups: Record<string, Character[]> = {}
+  for (const target of pool) {
+    const q = target.Quality.toString() === char.Quality.toString()
+    const e = target.Element.toLowerCase() === char.Element.toLowerCase()
+    const w = target.Weapon.toLowerCase() === char.Weapon.toLowerCase()
+    const r = target.Region.toLowerCase() === char.Region.toLowerCase()
+    let v = 'equal'
+    if (target.Version > char.Version) v = 'up'
+    else if (target.Version < char.Version) v = 'down'
+    const key = `${q}-${e}-${w}-${r}-${v}`
+    if (!detailedGroups[key]) detailedGroups[key] = []
+    detailedGroups[key].push(target)
+  }
+  return Object.entries(detailedGroups)
+    .map(([key, chars]) => ({
+      key,
+      label: labelFromKey(key),
+      count: chars.length,
+      characters: chars,
+      isWorstCase: chars.length === worstCase,
+      isWin: key === 'true-true-true-true-equal',
+    }))
+    .sort((a, b) => b.count - a.count)
+}
+
 // Minimax: pick the candidate that minimizes the worst-case remaining pool size.
 // Returns a discriminated union the UI can render directly.
 export function calculateBestNextGuess(pool: Character[], dataset: Character[]): Recommendation {
@@ -213,32 +246,7 @@ export function calculateBestNextGuess(pool: Character[], dataset: Character[]):
     }
   }
 
-  // Build detailed breakdown for the optimal selection, storing Character[] per group.
-  const detailedGroups: Record<string, Character[]> = {}
-  for (const target of pool) {
-    const q = target.Quality.toString() === optimalSelection!.Quality.toString()
-    const e = target.Element.toLowerCase() === optimalSelection!.Element.toLowerCase()
-    const w = target.Weapon.toLowerCase() === optimalSelection!.Weapon.toLowerCase()
-    const r = target.Region.toLowerCase() === optimalSelection!.Region.toLowerCase()
-
-    let v = 'equal'
-    if (target.Version > optimalSelection!.Version) v = 'up'
-    else if (target.Version < optimalSelection!.Version) v = 'down'
-
-    const patternKey = `${q}-${e}-${w}-${r}-${v}`
-    if (!detailedGroups[patternKey]) detailedGroups[patternKey] = []
-    detailedGroups[patternKey].push(target)
-  }
-
-  const breakdown: SignatureGroup[] = Object.entries(detailedGroups)
-    .map(([key, chars]) => ({
-      label: labelFromKey(key),
-      count: chars.length,
-      characters: chars,
-      isWorstCase: chars.length === lowestMaxGroup,
-      isWin: key === 'true-true-true-true-equal',
-    }))
-    .sort((a, b) => b.count - a.count)
+  const breakdown = computeBreakdown(optimalSelection!, pool, lowestMaxGroup)
 
   // pool.length >= 2 guarantees a selection was found.
   return {

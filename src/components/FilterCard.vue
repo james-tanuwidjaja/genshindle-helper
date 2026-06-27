@@ -92,6 +92,23 @@ const rangeFill = computed(() => {
   }
 })
 
+// Guard number inputs: only push to store when a finite number is entered.
+// On blur, if the current text is invalid, revert the input to the last store value.
+function handleVersionInput(field: 'min' | 'max' | 'exact', e: Event) {
+  const n = parseFloat((e.target as HTMLInputElement).value)
+  if (!Number.isFinite(n)) return
+  if (field === 'min') store.minVersion = n
+  else if (field === 'max') store.maxVersion = n
+  else { store.minVersion = n; store.maxVersion = n }
+}
+
+function revertIfInvalid(storeVal: number, e: Event) {
+  const input = e.target as HTMLInputElement
+  if (!Number.isFinite(parseFloat(input.value))) {
+    input.value = Number.isFinite(storeVal) ? String(storeVal) : ''
+  }
+}
+
 // Left-percentage position of each thumb, used to anchor the floating tooltip.
 const thumbPositions = computed(() => {
   const n = store.versions.length - 1
@@ -135,10 +152,10 @@ const thumbPositions = computed(() => {
           <div class="range-track"></div>
           <div class="range-track-fill" :style="{ left: rangeFill.left, right: rangeFill.right }"></div>
           <div class="thumb-tooltip" :style="{ left: thumbPositions.min }">
-            {{ store.minVersion.toFixed(1) }}
+            {{ Number.isFinite(store.minVersion) ? store.minVersion.toFixed(1) : '—' }}
           </div>
           <div class="thumb-tooltip" :style="{ left: thumbPositions.max }">
-            {{ store.maxVersion.toFixed(1) }}
+            {{ Number.isFinite(store.maxVersion) ? store.maxVersion.toFixed(1) : '—' }}
           </div>
           <input
             type="range"
@@ -162,11 +179,23 @@ const thumbPositions = computed(() => {
         <div class="version-inputs">
           <label>
             Min:
-            <input type="number" step="0.1" v-model.number="store.minVersion" />
+            <input
+              type="number"
+              step="0.1"
+              :value="store.minVersion"
+              @input="handleVersionInput('min', $event)"
+              @blur="revertIfInvalid(store.minVersion, $event)"
+            />
           </label>
           <label>
             Max:
-            <input type="number" step="0.1" v-model.number="store.maxVersion" />
+            <input
+              type="number"
+              step="0.1"
+              :value="store.maxVersion"
+              @input="handleVersionInput('max', $event)"
+              @blur="revertIfInvalid(store.maxVersion, $event)"
+            />
           </label>
         </div>
       </template>
@@ -175,7 +204,7 @@ const thumbPositions = computed(() => {
         <div class="range-slider">
           <div class="range-track"></div>
           <div class="thumb-tooltip" :style="{ left: thumbPositions.exact }">
-            {{ store.minVersion.toFixed(1) }}
+            {{ Number.isFinite(store.minVersion) ? store.minVersion.toFixed(1) : '—' }}
           </div>
           <input
             type="range"
@@ -190,7 +219,13 @@ const thumbPositions = computed(() => {
         <div class="version-inputs version-inputs-center">
           <label>
             Version:
-            <input type="number" step="0.1" v-model.number="exactVersion" />
+            <input
+              type="number"
+              step="0.1"
+              :value="store.minVersion"
+              @input="handleVersionInput('exact', $event)"
+              @blur="revertIfInvalid(store.minVersion, $event)"
+            />
           </label>
         </div>
       </template>
