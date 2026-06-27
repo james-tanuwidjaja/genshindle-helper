@@ -16,6 +16,7 @@ export interface ParsedData {
   elements: string[]
   weapons: string[]
   regions: string[]
+  versions: number[]
   minVer: number
   maxVer: number
 }
@@ -72,6 +73,7 @@ export function parseCSV(text: string): ParsedData {
   const elements = new Set<string>()
   const weapons = new Set<string>()
   const regions = new Set<string>()
+  const versions = new Set<number>()
   let minVer = 999
   let maxVer = 0
 
@@ -96,6 +98,7 @@ export function parseCSV(text: string): ParsedData {
     elements.add(charObj.Element)
     weapons.add(charObj.Weapon)
     regions.add(charObj.Region)
+    if (Number.isFinite(charObj.Version)) versions.add(charObj.Version)
 
     if (charObj.Version < minVer) minVer = charObj.Version
     if (charObj.Version > maxVer) maxVer = charObj.Version
@@ -107,6 +110,7 @@ export function parseCSV(text: string): ParsedData {
     elements: [...elements].sort(),
     weapons: [...weapons].sort(),
     regions: [...regions].sort(),
+    versions: [...versions].sort((a, b) => a - b),
     minVer,
     maxVer,
   }

@@ -48,3 +48,24 @@
 .upload-input {
   display: none;
 }
+
+.csv-example {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.download-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-pink);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.download-link:hover {
+  color: var(--accent-pink-hover);
+}
