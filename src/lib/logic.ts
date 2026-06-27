@@ -30,6 +30,14 @@ export interface Filters {
   maxVer: number
 }
 
+export type SignatureGroup = {
+  label: string
+  count: number
+  characters: Character[]
+  isWorstCase: boolean
+  isWin: boolean
+}
+
 export type Recommendation =
   | { type: 'none' }
   | { type: 'solved'; target: Character }
@@ -39,6 +47,8 @@ export type Recommendation =
       worstCase: number
       inPool: boolean
       poolSize: number
+      breakdown: SignatureGroup[]
+      alternatives: Array<{ selection: Character; inPool: boolean }>
     }
 
 // Parse CSV text into a dataset plus the unique attribute sets and version range.
@@ -109,7 +119,15 @@ export function parseCSV(text: string): ParsedData {
     qualities: [...qualities].sort(),
     elements: [...elements].sort(),
     weapons: [...weapons].sort(),
-    regions: [...regions].sort(),
+    regions: [...regions].sort((a, b) => {
+      const order = ['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','None']
+      const ai = order.indexOf(a)
+      const bi = order.indexOf(b)
+      if (ai === -1 && bi === -1) return a.localeCompare(b)
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    }),
     versions: [...versions].sort((a, b) => a - b),
     minVer,
     maxVer,
@@ -137,6 +155,17 @@ export function filterPool(dataset: Character[], filters: Filters): Character[] 
   )
 }
 
+function labelFromKey(key: string): string {
+  const [q, e, w, r, v] = key.split('-')
+  return [
+    q === 'true' ? 'Q✓' : 'Q✗',
+    e === 'true' ? 'E✓' : 'E✗',
+    w === 'true' ? 'W✓' : 'W✗',
+    r === 'true' ? 'R✓' : 'R✗',
+    v === 'equal' ? 'V=' : v === 'up' ? 'V↑' : 'V↓',
+  ].join(' ')
+}
+
 // Minimax: pick the candidate that minimizes the worst-case remaining pool size.
 // Returns a discriminated union the UI can render directly.
 export function calculateBestNextGuess(pool: Character[], dataset: Character[]): Recommendation {
@@ -146,6 +175,7 @@ export function calculateBestNextGuess(pool: Character[], dataset: Character[]):
   let optimalSelection: Character | null = null
   let lowestMaxGroup = Infinity
   let choiceInPool = false
+  const tiedCandidates: Array<{ selection: Character; inPool: boolean }> = []
 
   for (const candidate of dataset) {
     const signatureGroups: Record<string, number> = {}
@@ -167,15 +197,48 @@ export function calculateBestNextGuess(pool: Character[], dataset: Character[]):
     const currentMaxGroup = Math.max(...Object.values(signatureGroups))
     const currentInPool = pool.some((p) => p.Character === candidate.Character)
 
-    if (
-      currentMaxGroup < lowestMaxGroup ||
-      (currentMaxGroup === lowestMaxGroup && currentInPool && !choiceInPool)
-    ) {
+    if (currentMaxGroup < lowestMaxGroup) {
+      tiedCandidates.length = 0
       lowestMaxGroup = currentMaxGroup
       optimalSelection = candidate
       choiceInPool = currentInPool
+    } else if (currentMaxGroup === lowestMaxGroup) {
+      if (currentInPool && !choiceInPool) {
+        tiedCandidates.push({ selection: optimalSelection!, inPool: choiceInPool })
+        optimalSelection = candidate
+        choiceInPool = true
+      } else {
+        tiedCandidates.push({ selection: candidate, inPool: currentInPool })
+      }
     }
   }
+
+  // Build detailed breakdown for the optimal selection, storing Character[] per group.
+  const detailedGroups: Record<string, Character[]> = {}
+  for (const target of pool) {
+    const q = target.Quality.toString() === optimalSelection!.Quality.toString()
+    const e = target.Element.toLowerCase() === optimalSelection!.Element.toLowerCase()
+    const w = target.Weapon.toLowerCase() === optimalSelection!.Weapon.toLowerCase()
+    const r = target.Region.toLowerCase() === optimalSelection!.Region.toLowerCase()
+
+    let v = 'equal'
+    if (target.Version > optimalSelection!.Version) v = 'up'
+    else if (target.Version < optimalSelection!.Version) v = 'down'
+
+    const patternKey = `${q}-${e}-${w}-${r}-${v}`
+    if (!detailedGroups[patternKey]) detailedGroups[patternKey] = []
+    detailedGroups[patternKey].push(target)
+  }
+
+  const breakdown: SignatureGroup[] = Object.entries(detailedGroups)
+    .map(([key, chars]) => ({
+      label: labelFromKey(key),
+      count: chars.length,
+      characters: chars,
+      isWorstCase: chars.length === lowestMaxGroup,
+      isWin: key === 'true-true-true-true-equal',
+    }))
+    .sort((a, b) => b.count - a.count)
 
   // pool.length >= 2 guarantees a selection was found.
   return {
@@ -184,5 +247,7 @@ export function calculateBestNextGuess(pool: Character[], dataset: Character[]):
     worstCase: lowestMaxGroup,
     inPool: choiceInPool,
     poolSize: pool.length,
+    breakdown,
+    alternatives: tiedCandidates,
   }
 }
