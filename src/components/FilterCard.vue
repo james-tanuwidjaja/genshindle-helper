@@ -91,6 +91,17 @@ const rangeFill = computed(() => {
     right: `${100 - (maxIndex.value / n) * 100}%`,
   }
 })
+
+// Left-percentage position of each thumb, used to anchor the floating tooltip.
+const thumbPositions = computed(() => {
+  const n = store.versions.length - 1
+  if (n <= 0) return { min: '0%', max: '100%', exact: '0%' }
+  return {
+    min: `${(minIndex.value / n) * 100}%`,
+    max: `${(maxIndex.value / n) * 100}%`,
+    exact: `${(exactIndex.value / n) * 100}%`,
+  }
+})
 </script>
 
 <template>
@@ -123,6 +134,12 @@ const rangeFill = computed(() => {
         <div class="range-slider">
           <div class="range-track"></div>
           <div class="range-track-fill" :style="{ left: rangeFill.left, right: rangeFill.right }"></div>
+          <div class="thumb-tooltip" :style="{ left: thumbPositions.min }">
+            {{ store.minVersion.toFixed(1) }}
+          </div>
+          <div class="thumb-tooltip" :style="{ left: thumbPositions.max }">
+            {{ store.maxVersion.toFixed(1) }}
+          </div>
           <input
             type="range"
             class="range-input"
@@ -157,6 +174,9 @@ const rangeFill = computed(() => {
       <template v-else>
         <div class="range-slider">
           <div class="range-track"></div>
+          <div class="thumb-tooltip" :style="{ left: thumbPositions.exact }">
+            {{ store.minVersion.toFixed(1) }}
+          </div>
           <input
             type="range"
             class="range-input"
@@ -212,7 +232,33 @@ const rangeFill = computed(() => {
   height: 24px;
   display: flex;
   align-items: center;
-  margin: 8px 4px 0;
+  margin: 28px 4px 0;
+}
+
+.thumb-tooltip {
+  position: absolute;
+  top: -26px;
+  transform: translateX(-50%);
+  background: var(--accent-pink);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.thumb-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--accent-pink);
 }
 
 .range-track,
