@@ -28,7 +28,9 @@ const activeChar = computed(() => displayedChar.value ?? guess.value?.selection 
 // inPool status for whatever is currently being displayed
 const activeInPool = computed(() => {
   if (!guess.value) return false
-  if (!displayedChar.value) return guess.value.inPool
+  if (!displayedChar.value || displayedChar.value.Character === guess.value.selection.Character) {
+    return guess.value.inPool
+  }
   return (
     guess.value.alternatives.find(
       (a) => a.selection.Character === displayedChar.value!.Character,
